@@ -3,7 +3,7 @@ use std::{borrow::Cow, collections::HashMap};
 use twilight_model::{
     application::{
         command::{Command, CommandOption, CommandOptionType, CommandType},
-        interaction::InteractionChannel,
+        interaction::{InteractionChannel, InteractionContextType},
     },
     channel::Attachment,
     guild::{Permissions, Role},
@@ -245,6 +245,14 @@ pub struct ApplicationCommandData {
 
 impl From<ApplicationCommandData> for Command {
     fn from(item: ApplicationCommandData) -> Self {
+        let mut contexts = None;
+
+        if let Some(dm_permission) = item.dm_permission {
+            if dm_permission {
+                contexts.replace(vec![InteractionContextType::BotDm]);
+            }
+        }
+
         Command {
             application_id: None,
             guild_id: None,
@@ -252,6 +260,7 @@ impl From<ApplicationCommandData> for Command {
             name_localizations: item.name_localizations,
             default_member_permissions: item.default_member_permissions,
             dm_permission: item.dm_permission,
+            contexts,
             description: item.description,
             description_localizations: item.description_localizations,
             id: None,
@@ -259,6 +268,7 @@ impl From<ApplicationCommandData> for Command {
             nsfw: item.nsfw,
             options: item.options,
             version: Id::new(1),
+            integration_types: None,
         }
     }
 }
